@@ -1,33 +1,37 @@
-var express = require('express');
-var router = express.Router();
+const express = require('express')
+const router = express.Router()
+const sqlite3 = require('sqlite3').verbose()
 
-var sqlite3 = require('sqlite3').verbose()
-
-let db = new sqlite3.Database('node_project.db');
+const db = new sqlite3.Database('node_project.db')
 
 router.get('/', (req, res) => {
-  var sql = "select * from book"
+  const sql = "select * from book"
   db.all(sql, [], (err, rows) => {
     if (err) {
-      res.status(400).json({"error":err.message});
-      return;
+      res.status(400).json({"error":err.message})
+      return
     }
-    res.json({
-      "message":"success",
-      "data":rows
-    })
-  });
+    res.json(rows.map(row => ({
+      id: row.ID,
+      title: row.title,
+      author: row.author,
+      pages: row.pages,
+      year: row.year,
+      genre: row.genre
+    })))
+  })
 })
 
 router.post('/', (req, res) => {
   const sql = 'insert into book (title, author, pages, year, genre) values (?, ?, ?, ?, ?)'
+  console.log(req.body)
   const { title, author, pages, year, genre } = req.body
   const params = [title, author, pages, year, genre]
   db.run(sql, params, function (err, result) {  // do NOT change to arrow function
     console.log(err)
     console.log(result)
     res.status(201).json({
-      ID: this.lastID, title, author, pages, year, genre
+      id: this.lastID, title, author, pages, year, genre
     })
   })
 })
@@ -37,7 +41,9 @@ router.put('/:id', (req, res) => {
   const { title, author, pages, year, genre } = req.body
   const params = [title, author, pages, year, genre, req.params.id]
   db.run(sql, params, (err, result) => {
-    res.json({ ID: req.params.id, title, author, pages, year, genre })
+    console.log(err)
+    console.log(result)
+    res.json({ id: req.params.id, title, author, pages, year, genre })
   })
 })
 
@@ -49,4 +55,4 @@ router.delete('/:id', (req, res) => {
   })
 })
 
-module.exports = router;
+module.exports = router
