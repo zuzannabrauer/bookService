@@ -10,10 +10,11 @@ var app = express();
 
 app.use(logger('dev'));
 app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
+app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(cors())
 app.use('/books', booksRouter);
+app.use(express.static("/home/zuza/node_project/uploads"));
 
 app.use(function(req, res, next) {
   next(createError(404));

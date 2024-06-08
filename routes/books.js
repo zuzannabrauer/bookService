@@ -1,8 +1,22 @@
 const express = require('express')
+const path = require('path')
 const router = express.Router()
 const sqlite3 = require('sqlite3').verbose()
 
+const multer = require('multer');
+
 const db = new sqlite3.Database('node_project.db')
+
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, './uploads/')
+  },
+  filename: function (req, file, cb) {
+    cb(null, Date.now() + path.extname(file.originalname)) //Appending extension
+  }
+})
+
+const upload = multer({ storage: storage });
 
 router.get('/', (req, res) => {
   const sql = "select * from book"
@@ -22,8 +36,9 @@ router.get('/', (req, res) => {
   })
 })
 
-router.post('/', (req, res) => {
+router.post('/', upload.single('file'), (req, res) => {
   const sql = 'insert into book (title, author, pages, year, genre) values (?, ?, ?, ?, ?)'
+  console.log(req.file)
   console.log(req.body)
   const { title, author, pages, year, genre } = req.body
   const params = [title, author, pages, year, genre]
